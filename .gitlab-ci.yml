@@ -1,0 +1,165 @@
+image: qa-roc.apuscn.com/frontend/vue-build:2.0.2
+
+stages:
+  - inspect
+  - build
+  - deploy
+
+lint:
+  stage: inspect
+  except:
+    - master
+  script:
+    - ln -s /node_modules $PWD/node_modules
+    - yarn lint
+
+check-copy:
+  stage: inspect
+  except:
+    - master
+  script:
+    - jscpd src --blame  true --threshold 4
+
+
+.build: &build_config
+  stage: build
+  artifacts:
+    paths:
+      - dist/
+    name: "$CI_JOB_NAME"
+    expire_in: 10min
+  before_script:
+    - cp -rf /node_modules $PWD/
+    - yarn --production  
+
+.prod: &prod_config
+  only: 
+    - tags
+
+.dev: &dev_config
+  only: 
+    - dev
+    - development
+    - develop
+  except:
+    - tags
+
+.test: &test_config
+  only: 
+    - test
+    - qa
+  except:
+    - tags
+
+build:docs:
+  only: 
+    - docs
+  stage: build
+  artifacts:
+    paths:
+      - docs/.vuepress/dist/
+    name: "$CI_JOB_NAME"
+    expire_in: 10min
+  script:
+    - yarn 
+    - yarn docs:build
+
+deploy:docs:
+  only: 
+    - docs
+  dependencies:
+    - build:docs
+  stage: deploy
+  image: qa-roc.apuscn.com/frontend/fex:latest
+  environment:
+    name: docs
+  script:
+    - export FEX_ENV=prod
+    - export FEX_PREFIX=common
+    - cd docs/.vuepress/
+    - fex deploy ci
+  
+.other: &other_config
+  except: 
+    - master
+    - qa
+    - test
+    - dev
+    - development
+    - develop
+    - tags
+    - docs
+
+build:prod:
+  <<: *build_config
+  <<: *prod_config
+  script:
+    - vue-cli-service build --fullPath=/
+
+deploy:prod:
+  stage: deploy
+  image: qa-roc.apuscn.com/frontend/fex:latest
+  <<: *prod_config
+  script:
+    - export FEX_ENV=prod
+    - export FEX_PREFIX=common
+    - fex deploy ci
+  dependencies:
+    - build:prod
+  when: manual
+  environment:
+    name: prod
+
+build:other:
+  <<: *build_config
+  <<: *other_config
+  script:
+    - vue-cli-service build --fullPath=/ci/$CI_PROJECT_NAME/$CI_BUILD_REF_SLUG --env=dev
+
+deploy:other:
+  stage: deploy
+  image: qa-roc.apuscn.com/frontend/fex:latest
+  <<: *other_config
+  script:
+    - fex deploy ci
+  dependencies:
+    - build:other
+  environment:
+    name: review/$CI_BUILD_REF_SLUG
+    url: http://test-fe.apuscn.com/ci/$CI_PROJECT_NAME/$CI_BUILD_REF_SLUG/index.html
+
+build:dev:
+  <<: *build_config
+  <<: *dev_config
+  script:
+    - vue-cli-service build --fullPath=/ci/$CI_PROJECT_NAME --env=dev
+
+deploy:dev:
+  stage: deploy
+  image: qa-roc.apuscn.com/frontend/fex:latest
+  <<: *dev_config
+  script:
+    - fex deploy ci
+  dependencies:
+    - build:dev
+  environment:
+    name: dev
+    url: http://test-fe.apuscn.com/ci/$CI_PROJECT_NAME/index.html
+
+build:qa:
+  <<: *build_config
+  <<: *test_config
+  script:
+    - vue-cli-service build --fullPath=/ci/$CI_PROJECT_NAME --env=test
+
+deploy:qa:
+  stage: deploy
+  image: qa-roc.apuscn.com/frontend/fex:latest
+  <<: *test_config
+  script:
+    - fex deploy ci
+  dependencies:
+    - build:qa
+  environment:
+    name: qa
+    url: http://qa-fe.apuscn.com/ci/$CI_PROJECT_NAME/index.html

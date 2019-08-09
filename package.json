@@ -1,0 +1,60 @@
+{
+    "name": "op-cms",
+    "version": "0.1.4",
+    "private": true,
+    "scripts": {
+        "serve": "node scripts/serve.js",
+        "build": "vue-cli-service build",
+        "lint": "vue-cli-service lint",
+        "docs:dev": "vuepress dev docs",
+        "docs:build": "vuepress build docs"
+    },
+    "dependencies": {
+        "axios": "^0.18.0",
+        "lodash.find": "^4.6.0",
+        "path-to-regexp": "^3.0.0",
+        "vue": "^2.5.17",
+        "vue-meta": "^1.5.2",
+        "vue-utear": "^0.7.8-bata",
+        "vuex": "^3.0.1"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "^3.0.4",
+        "@vue/cli-plugin-eslint": "^3.0.4",
+        "@vue/cli-service": "^3.0.4",
+        "@vue/eslint-config-standard": "^4.0.0",
+        "babel-eslint": "^10.0.1",
+        "chokidar": "^2.1.5",
+        "cross-spawn": "^6.0.5",
+        "eslint": "^5.8.0",
+        "eslint-plugin-vue": "^5.0.0-0",
+        "less": "^3.8.1",
+        "less-loader": "^4.1.0",
+        "vue-template-compiler": "^2.5.17",
+        "vuepress": "^0.14.4"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "@vue/standard"
+        ],
+        "rules": {},
+        "parserOptions": {
+            "parser": "babel-eslint"
+        }
+    },
+    "postcss": {
+        "plugins": {
+            "autoprefixer": {}
+        }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 8"
+    ]
+}

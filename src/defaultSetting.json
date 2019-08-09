@@ -1,0 +1,11 @@
+{
+  "title":"IAP商品管理系统",
+  "navTheme": "dark",
+  "layout": "base",
+  "contentWidth": "Fixed",
+  "fixedHeader": true,
+  "collapse": true,
+  "notice": true,
+  "help":"https://utear-pro.apuscn.com",
+  "homeURI":"/dashboard/workspace"
+}
